@@ -2,12 +2,15 @@ import sys
 import profile
 import array
 import collections
+import re
 
 def main():
+    inf = float("inf")
     with open(sys.argv[1], "r") as f:
         for line in f.readlines():
             data = line.strip().split('; ') 
-            src, dst = map(int, data[0].strip('()').split(','))
+            src, dst = map(int, data[0].strip('()').split(',')) 
+            
             routes = [map(int, r.split('=')[1].strip('[]').split(',')) for r in data[1:]]
             #create a graph with the routes 
             #print "routes: %s" % routes
@@ -36,16 +39,14 @@ def main():
                         node_ref[r[i]].append(start+i)
                 start += rlen
             #print "create graph: %s" % g
-            ans = 100000000
+            visited = [False] * start
+            costs = [inf] * start
             #print node_ref[src]
             for s in node_ref[src]:
-                visited = [False] * start
-                costs = [100000000] * start
-                costs[s] = 0
-                get_cost(s, g, visited, costs)
-                res = min([costs[node] for node in node_ref[dst]])
-                if res < ans:ans = res
-            if ans == 100000000:
+                costs[s] = 0 
+            get_cost(node_ref[src], g, visited, costs)
+            ans = min([costs[node] for node in node_ref[dst]])
+            if ans == inf:
                 print "None"
             else:
                 print ans
@@ -53,8 +54,8 @@ def main():
 
 def get_cost(src, g, visited, costs):
     nq = collections.deque()
-    nq.append(src)
-    costs[src] = 0
+    for s in src:
+        nq.append(s)
     while nq:
         curnode = nq.popleft()
         visited[curnode] = True
