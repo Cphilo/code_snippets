@@ -1,10 +1,11 @@
 import sys
 import re
+import profile
 
 #http://en.wikipedia.org/wiki/Bron%E2%80%93Kerbosch_algorithm
 def BronKerbosch2(r, p, x, ans, g):
     if len(p) == 0 and len(x) == 0:
-        ans.append(r)
+        if len(r) >= 3:ans.append(r)
         return
     u = None
     for node in p|x:
@@ -18,30 +19,30 @@ def BronKerbosch2(r, p, x, ans, g):
         x = x | set([v])
 
 def main():
-    g = {}
     edges = set()
     nodes = set()
+    ptn = re.compile(r'[^ \t]+@[^ \t]+')
     with open(sys.argv[1], "r") as f:
         for line in f:
-            ptn = re.compile(r'[^ \t]+@[^ \t]+')
             f, t = re.findall(ptn, line.strip())
             edges.add((f, t))
             nodes.add(f)
             nodes.add(t)
-    for n in nodes:
-        g[n] = set()
-    for f in nodes:
-        for t in nodes:
-            if f != t and (f, t) in edges and (t, f) in edges:
+    g = {n:set() for n in nodes}
+    lnodes = list(nodes)
+    for i in range(len(nodes)):
+        for j in range(i+1, len(nodes)):
+            f = lnodes[i]
+            t = lnodes[j]
+            if (f, t) in edges and (t, f) in edges:
                 g[f].add(t)
                 g[t].add(f)
     ans = []
     BronKerbosch2(set(), nodes, set(), ans, g)
-    for a in ans:
-        emails = ''
-        for u in sorted(list(a)):
-            emails += "%s, " % u
-        print emails[:-2]
+    emails = [", ".join(sorted(a)) for a in ans]
+    for e in sorted(emails):
+        print e
 
 if __name__ == '__main__':
     main()
+    #profile.run("main();")
