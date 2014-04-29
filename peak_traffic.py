@@ -5,7 +5,8 @@ import profile
 #http://en.wikipedia.org/wiki/Bron%E2%80%93Kerbosch_algorithm
 def BronKerbosch2(r, p, x, ans, g):
     if len(p) == 0 and len(x) == 0:
-        if len(r) >= 3:ans.append(r)
+        if len(r) >= 3:
+            ans.append(r)
         return
     u = None
     for node in p|x:
@@ -14,7 +15,7 @@ def BronKerbosch2(r, p, x, ans, g):
         elif len(g[node]) > len(g[u]):
             u = node 
     for v in p-g[u]:
-        BronKerbosch2(r|g[v], p&g[v], x&g[v], ans, g)
+        BronKerbosch2(r|set([v]), p&g[v], x&g[v], ans, g)
         p = p - set([v])
         x = x | set([v])
 
@@ -40,8 +41,7 @@ def main():
     ans = []
     BronKerbosch2(set(), nodes, set(), ans, g)
     emails = [", ".join(sorted(a)) for a in ans]
-    for e in sorted(emails):
-        print e
+    print "\n".join(sorted(emails))
 
 if __name__ == '__main__':
     main()
