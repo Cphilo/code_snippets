@@ -1,0 +1,41 @@
+import socket
+import Queue 
+import threading
+
+q = Queue.Queue()
+HOSTS_FILE = "drc_hosts.txt"
+NOW_FILE = "df"
+fd = open(NOW_FILE, "w")
+lock = threading.Lock()
+hosts = []
+def f():
+    while True:
+        host = q.get()
+        try:
+            ip = socket.gethostbyname(host)
+            print "%s ok." % ip
+        except Exception, e:
+            print "%s err." % host
+            ip = host
+        w(ip)
+        q.task_done()
+
+def w(ip):
+    lock.acquire()
+    if ip not in hosts:
+        hosts.append(ip)
+    lock.release() 
+
+for i in range(10):
+    worker = threading.Thread(target=f)
+    worker.setDaemon(True)
+    worker.start()
+with open(HOSTS_FILE, "r") as f:
+    for line in f:
+        line = line.strip()
+        if line:
+            q.put(line)
+q.join()
+for h in hosts:
+    fd.write("%s\n" % h)
+fd.close()
